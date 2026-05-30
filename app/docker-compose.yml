@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
       MYSQL_DATABASE: flaskdb
@@ -21,7 +18,6 @@ services:
 
   flask-api:
     build: ./flask-api
-    container_name: flask-api
     environment:
       DB_HOST: mysql
       DB_USER: flaskuser
@@ -35,9 +31,8 @@ services:
 
   nginx:
     build: ./nginx
-    container_name: nginx
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - flask-api
     networks:
