@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerPilot AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <h2>🚀 CareerPilot AI</h2>
+    </div>
+    <div class="menu-item active">📊 Dashboard</div>
+    <div class="menu-item">👨‍🎓 Students</div>
+    <div class="menu-item">💡 Skills</div>
+    <div class="menu-item">🎯 Career Match</div>
+    <div class="menu-item">🛣️ Roadmaps</div>
+</div>
+
+<div class="main">
+
+    <div class="hero">
+        <h1>CareerPilot AI</h1>
+        <p>AI Powered Career Readiness & Placement Tracker</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Total Students</h3>
+            <h1 id="studentCount">0</h1>
+        </div>
+        <div class="stat-card highlight-green">
+            <h3>Readiness</h3>
+            <h1 id="readinessScore">0%</h1>
+        </div>
+        <div class="stat-card highlight-blue">
+            <h3>Career Goal</h3>
+            <h1 id="currentCareer">-</h1>
+        </div>
+    </div>
+
+    <div class="dashboard">
+
+        <div class="card">
+            <h2>🎓 Add Student</h2>
+            <div class="form-container">
+                <input id="name" placeholder="Student Name">
+
+                <select id="department">
+                    <option value="" disabled selected hidden>Select Department</option>
+                    <option>Computer Science</option>
+                    <option>Software Engineering</option>
+                    <option>Artificial Intelligence</option>
+                    <option>Data Science</option>
+                    <option>Cyber Security</option>
+                    <option>Business Administration</option>
+                </select>
+
+                <select id="careerGoal">
+                    <option value="" disabled selected hidden>Select Career Goal</option>
+                    <option>DevOps Engineer</option>
+                    <option>Software Engineer</option>
+                    <option>Backend Developer</option>
+                    <option>Frontend Developer</option>
+                    <option>Full Stack Developer</option>
+                    <option>Cloud Engineer</option>
+                    <option>Data Analyst</option>
+                    <option>Data Scientist</option>
+                    <option>Cyber Security Analyst</option>
+                </select>
+
+                <div class="input-row">
+                    <input id="semester" placeholder="Semester">
+                    <input id="cgpa" placeholder="CGPA">
+                </div>
+
+                <button class="btn btn-primary" onclick="addStudent()">Add Student</button>
+            </div>
+
+            <hr>
+
+            <h2>💡 Add Skill</h2>
+            <div class="form-container">
+                <select id="studentSelect">
+                    </select>
+
+                <select id="skillName">
+                    <option value="" disabled selected hidden>Select Skill</option>
+                    <option>Git</option>
+                    <option>Linux</option>
+                    <option>Docker</option>
+                    <option>Kubernetes</option>
+                    <option>AWS</option>
+                    <option>Terraform</option>
+                    <option>CI/CD</option>
+                    <option>Python</option>
+                    <option>SQL</option>
+                    <option>Machine Learning</option>
+                </select>
+
+                <button class="btn btn-secondary" onclick="addSkill()">Add Skill</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👤 Student Profile</h2>
+            <div class="profile-action-row">
+                <select id="analysisStudent"></select>
+                <button class="btn btn-primary" onclick="loadReadiness()">Load Profile</button>
+            </div>
+            
+            <div id="studentProfile" class="profile-data-box"></div>
+
+            <h2 class="sub-section-title">💡 Student Skills</h2>
+            <div id="studentSkills" class="badges-wrapper"></div>
+        </div>
+
+        <div class="card">
+            <h2>🎯 Career Analysis</h2>
+            <div class="progress-wrapper">
+                <span class="progress-title">Readiness Level Tracker</span>
+                <div class="progress">
+                    <div id="progressBar"></div>
+                </div>
+            </div>
+            
+            <div id="analysisResult" class="analysis-data-box"></div>
+
+            <h2 class="sub-section-title">🎯 Top Career Matches</h2>
+            <div id="careerMatches" class="matches-list-wrapper"></div>
+        </div>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

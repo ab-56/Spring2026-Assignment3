@@ -5,15 +5,81 @@ import time
 
 app = Flask(__name__)
 
-REQUIRED_SKILLS = [
-    "Python",
-    "Git",
-    "Docker",
-    "Linux",
-    "Kubernetes",
-    "Cloud",
-    "SQL"
-]
+CAREER_PATHS = {
+
+    "DevOps Engineer": [
+        "Git",
+        "Linux",
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "Terraform",
+        "CI/CD"
+    ],
+
+    "Software Engineer": [
+        "Python",
+        "Java",
+        "SQL",
+        "Git",
+        "Problem Solving"
+    ],
+
+    "Backend Developer": [
+        "Python",
+        "Java",
+        "SQL",
+        "Git",
+        "Docker"
+    ],
+
+    "Frontend Developer": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Git"
+    ],
+
+    "Full Stack Developer": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Python",
+        "SQL",
+        "Git",
+        "Docker"
+    ],
+
+    "Cloud Engineer": [
+        "Linux",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Terraform"
+    ],
+
+    "Data Analyst": [
+        "Excel",
+        "SQL",
+        "Python",
+        "Power BI"
+    ],
+
+    "Data Scientist": [
+        "Python",
+        "SQL",
+        "Machine Learning",
+        "Deep Learning",
+        "Statistics"
+    ],
+
+    "Cyber Security Analyst": [
+        "Linux",
+        "Networking",
+        "Cyber Security",
+        "Ethical Hacking"
+    ]
+}
 
 
 def get_db_connection():
@@ -118,15 +184,16 @@ def create_student():
     cursor.execute(
         """
         INSERT INTO students
-        (name, department, semester, cgpa)
-        VALUES (%s, %s, %s, %s)
+        (name, department, career_goal, semester, cgpa)
+        VALUES (%s, %s, %s, %s, %s)
         """,
         (
-            data["name"],
-            data.get("department", ""),
-            data.get("semester", ""),
-            data.get("cgpa", 0)
-        )
+    data["name"],
+    data.get("department", ""),
+    data.get("career_goal", ""),
+    data.get("semester", ""),
+    data.get("cgpa", 0)
+)
     )
 
     conn.commit()
@@ -137,13 +204,13 @@ def create_student():
     conn.close()
 
     return jsonify({
-        "id": student_id,
-        "name": data["name"],
-        "department": data.get("department", ""),
-        "semester": data.get("semester", ""),
-        "cgpa": data.get("cgpa", 0)
-    }), 201
-
+    "id": student_id,
+    "name": data["name"],
+    "department": data.get("department", ""),
+    "career_goal": data.get("career_goal", ""),
+    "semester": data.get("semester", ""),
+    "cgpa": data.get("cgpa", 0)
+}), 201
 
 @app.route("/api/student", methods=["GET"])
 def get_students():
@@ -166,7 +233,36 @@ def get_students():
         )
 
     return jsonify(students)
+@app.route("/api/student/<int:student_id>", methods=["GET"])
+def get_student(student_id):
 
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM students
+        WHERE id = %s
+        """,
+        (student_id,)
+    )
+
+    student = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not student:
+        return jsonify({
+            "error": "Student not found"
+        }), 404
+
+    student["created_at"] = student["created_at"].strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    return jsonify(student)
 
 @app.route("/api/skills", methods=["POST"])
 def add_skill():
@@ -241,6 +337,29 @@ def get_skills():
 
     return jsonify(skills)
 
+
+@app.route("/api/skills/<int:student_id>", methods=["GET"])
+def get_student_skills(student_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT skill_name
+        FROM skills
+        WHERE student_id = %s
+        ORDER BY skill_name
+        """,
+        (student_id,)
+    )
+
+    skills = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(skills)
 
 @app.route("/api/internships", methods=["POST"])
 def add_internship():
@@ -357,7 +476,7 @@ def career_readiness(student_id):
 
     cursor.execute(
         """
-        SELECT name
+        SELECT name, career_goal
         FROM students
         WHERE id = %s
         """,
@@ -369,29 +488,49 @@ def career_readiness(student_id):
     cursor.close()
     conn.close()
 
+    if not student:
+        return jsonify({
+            "error": "Student not found"
+        }), 404
+
+    career_goal = student.get("career_goal", "")
+
+    required_skills = CAREER_PATHS.get(
+        career_goal,
+        []
+    )
+
     matched = []
 
-    for skill in REQUIRED_SKILLS:
+    for skill in required_skills:
         if skill.lower() in student_skills:
             matched.append(skill)
 
     missing = [
         skill
-        for skill in REQUIRED_SKILLS
+        for skill in required_skills
         if skill not in matched
     ]
 
-    score = int(
-        (len(matched) / len(REQUIRED_SKILLS)) * 100
-    )
+    if len(required_skills) > 0:
+        score = int(
+            (len(matched) / len(required_skills)) * 100
+        )
+    else:
+        score = 0
 
     return jsonify({
         "student": student["name"],
+        "career_goal": career_goal,
+        "required_skills": required_skills,
         "career_readiness_score": score,
         "matched_skills": matched,
-        "missing_skills": missing
+        "missing_skills": missing,
+        "roadmap": [
+            f"Learn {skill}"
+            for skill in missing
+        ]
     })
-
 
 @app.route("/api/recommendations/<int:student_id>", methods=["GET"])
 def recommendations(student_id):
@@ -470,7 +609,57 @@ def stats():
         "total_applications": total_applications
     })
 
+@app.route("/api/career-match/<int:student_id>", methods=["GET"])
+def career_match(student_id):
 
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT skill_name
+        FROM skills
+        WHERE student_id = %s
+        """,
+        (student_id,)
+    )
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    student_skills = [
+        row["skill_name"].lower()
+        for row in rows
+    ]
+
+    matches = []
+
+    for career, required_skills in CAREER_PATHS.items():
+
+        matched = 0
+
+        for skill in required_skills:
+
+            if skill.lower() in student_skills:
+                matched += 1
+
+        score = int(
+            (matched / len(required_skills)) * 100
+        )
+
+        matches.append({
+            "career": career,
+            "score": score
+        })
+
+    matches.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    return jsonify(matches)
 if __name__ == "__main__":
     init_db()
     app.run(
