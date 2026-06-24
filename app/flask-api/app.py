@@ -111,10 +111,11 @@ def init_db():
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             department VARCHAR(255),
+            career_goal VARCHAR(255),
             semester VARCHAR(50),
             cgpa FLOAT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+)
     """)
 
     cursor.execute("""
@@ -559,7 +560,13 @@ def recommendations(student_id):
 
     recommendations_list = []
 
-    for skill in REQUIRED_SKILLS:
+    career_goal = "Software Engineer"
+
+    for skill in CAREER_PATHS.get(career_goal, []):
+       if skill.lower() not in student_skills:
+        recommendations_list.append(
+            f"Improve your {skill} skill."
+        )
         if skill.lower() not in student_skills:
             recommendations_list.append(
                 f"Improve your {skill} skill."

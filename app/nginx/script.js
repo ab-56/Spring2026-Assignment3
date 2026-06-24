@@ -144,6 +144,19 @@ async function loadReadiness() {
     const readiness = await readinessRes.json();
 
     document.getElementById("readinessScore").innerText = readiness.career_readiness_score + "%";
+    let level = "Beginner";
+
+    if (readiness.career_readiness_score >= 86) {   
+    level = "Placement Ready";
+}
+    else if (readiness.career_readiness_score >= 61) {
+    level = "Job Ready";
+}
+    else if (readiness.career_readiness_score >= 31) {
+    level = "Intermediate";
+}
+
+document.getElementById("readinessLevel").innerText = level; 
     document.getElementById("progressBar").style.width = readiness.career_readiness_score + "%";
 
     let analysisHtml = `
